@@ -1,8 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { motion } from 'framer-motion'
-import { Facebook, Twitter, Linkedin, Instagram, Mail, Phone, MapPin } from 'lucide-react'
+import { Facebook, Twitter, Linkedin, Instagram, Sparkles } from 'lucide-react'
 
 const Footer = () => {
   const currentYear = new Date().getFullYear()
@@ -42,88 +41,45 @@ const Footer = () => {
   ]
 
   return (
-    <footer className="bg-gradient-to-br from-gray-900 via-blue-900 to-indigo-900 text-white">
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
-          {/* Brand Section */}
-          <div className="lg:col-span-2">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-            >
-              <h3 className="text-2xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
-                GEM Connect
-              </h3>
-              <p className="text-gray-300 mb-6 max-w-md">
-                Connecting businesses with expert GEM portal freelancers. Simplifying government e-marketplace operations for everyone.
-              </p>
-              <div className="space-y-2 text-gray-300">
-                <div className="flex items-center gap-2">
-                  <Mail size={18} />
-                  <span>contact@gemconnect.com</span>
+      <footer className="bg-gray-950 text-gray-400 py-16">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-10 mb-12">
+            <div className="col-span-2 md:col-span-1">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-sky-500 flex items-center justify-center">
+                  <Sparkles className="w-4 h-4 text-white" />
                 </div>
-                <div className="flex items-center gap-2">
-                  <Phone size={18} />
-                  <span>+91 1800-123-4567</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <MapPin size={18} />
-                  <span>Mumbai, Maharashtra, India</span>
-                </div>
+                <span className="text-white font-bold text-lg">GEM<span className="text-sky-400">Pro</span></span>
               </div>
-            </motion.div>
+              <p className="text-sm leading-relaxed text-gray-500">Connecting businesses with GEM portal experts since 2023.</p>
+            </div>
+            {[
+              { heading: 'Platform', items: ['Features', 'Pricing', 'About', 'Contact'] },
+              { heading: 'Resources', items: ['Blog', 'Documentation', 'Help Center', 'API'] },
+              { heading: 'Legal', items: ['Privacy', 'Terms', 'Security', 'Compliance'] },
+            ].map((col, i) => (
+              <div key={i}>
+                <h4 className="text-white font-semibold text-sm mb-4">{col.heading}</h4>
+                <ul className="space-y-2.5">
+                  {col.items.map((item, j) => (
+                    <li key={j}>
+                      <Link href="#" className="text-sm hover:text-blue-400 transition-colors">{item}</Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
-
-          {/* Links Sections */}
-          {footerLinks.map((section, index) => (
-            <motion.div
-              key={section.title}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
-            >
-              <h4 className="font-semibold text-lg mb-4">{section.title}</h4>
-              <ul className="space-y-2">
-                {section.links.map((link) => (
-                  <li key={link.name}>
-                    <Link
-                      href={link.href}
-                      className="text-gray-300 hover:text-blue-400 transition-colors"
-                    >
-                      {link.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Bottom Section */}
-        <div className="mt-12 pt-8 border-t border-gray-700">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-gray-400 text-sm">
-              © {currentYear} GEM Connect. All rights reserved.
-            </p>
-            <div className="flex gap-4">
-              {socialLinks.map((social) => (
-                <motion.a
-                  key={social.label}
-                  href={social.href}
-                  whileHover={{ scale: 1.2, y: -2 }}
-                  className="bg-white/10 p-2 rounded-full hover:bg-blue-600 transition-colors"
-                  aria-label={social.label}
-                >
-                  <social.icon size={20} />
-                </motion.a>
-              ))}
+          <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+            <p className="text-sm text-gray-600">&copy; {new Date().getFullYear()} GEMPro. All rights reserved.</p>
+            <div className="flex gap-6 text-sm">
+              <Link href="#" className="hover:text-blue-400 transition-colors">Twitter</Link>
+              <Link href="#" className="hover:text-blue-400 transition-colors">LinkedIn</Link>
+              <Link href="#" className="hover:text-blue-400 transition-colors">GitHub</Link>
             </div>
           </div>
         </div>
-      </div>
-    </footer>
+      </footer>
   )
 }
 
