@@ -2,8 +2,8 @@
 
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { ArrowRight, Users, ShoppingCart, ListChecks, TrendingUp, Shield, Clock, Briefcase, Target, Award } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { ArrowRight, Users, ShoppingCart, ListChecks, TrendingUp, Shield, Briefcase, Target, Award } from 'lucide-react'
+import { Button } from '@/app/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/app/components/ui/card'
 import MembershipCard from '@/app/components/MembershipCard'
 import { Badge } from '@/app/components/ui/badge'

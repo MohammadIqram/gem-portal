@@ -3,8 +3,8 @@
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, ChevronDown } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Menu, X } from 'lucide-react'
+import { Button } from '@/app/components/ui/button'
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false)
