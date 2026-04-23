@@ -15,6 +15,10 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Separator } from '@/app/components/ui/separator'
 import { Checkbox } from '@/app/components/ui/checkbox'
 import { RadioGroup, RadioGroupItem } from '@/app/components/ui/radio-group'
+import { useUserStore } from '@/stores/useUserStore'
+import { Turnstile } from "@marsidev/react-turnstile";
+import { Loader2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 const SignupPage = () => {
   const [showPassword, setShowPassword] = useState(false)
@@ -29,14 +33,25 @@ const SignupPage = () => {
     terms: false,
   })
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    console.log('Signup submitted:', formData)
-  }
+  const { signup, loading } = useUserStore();
+  const [token, setToken] = useState(null);
+  const router = useRouter();
 
-  const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    const res = await signup(formData, token);
+    if (res?.next) {
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        password: '',
+        confirmPassword: '',
+        userType: 'client',
+        terms: false,
+      })
+      router.push(res.next);
+    }
   }
 
   return (
@@ -130,14 +145,14 @@ const SignupPage = () => {
                     <Label htmlFor="name">Full Name</Label>
                     <div className="relative group">
                       <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors" size={18} />
-                      <Input id="name" name="name" placeholder="John Doe" className="pl-10 h-12 rounded-xl bg-slate-50/50 border-slate-200" required />
+                      <Input onChange={(v) => setFormData(p => ({ ...p, name: v.target.value }))} value={formData.name} id="name" name="name" placeholder="John Doe" className="pl-10 h-12 rounded-xl bg-slate-50/50 border-slate-200" required />
                     </div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="email">Work Email</Label>
                     <div className="relative group">
                       <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors" size={18} />
-                      <Input id="email" name="email" type="email" placeholder="john@company.com" className="pl-10 h-12 rounded-xl bg-slate-50/50 border-slate-200" required />
+                      <Input onChange={(v) => setFormData(p => ({ ...p, email: v.target.value }))} value={formData.email} id="email" name="email" type="email" placeholder="john@company.com" className="pl-10 h-12 rounded-xl bg-slate-50/50 border-slate-200" required />
                     </div>
                   </div>
                 </div>
@@ -146,7 +161,7 @@ const SignupPage = () => {
                   <Label htmlFor="phone">Phone Number</Label>
                   <div className="relative group">
                     <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors" size={18} />
-                    <Input id="phone" name="phone" type="tel" placeholder="+91 00000 00000" className="pl-10 h-12 rounded-xl bg-slate-50/50 border-slate-200" required />
+                    <Input onChange={(v) => setFormData(p => ({ ...p, phone: v.target.value }))} value={formData.phone} id="phone" name="phone" type="tel" placeholder="+91 00000 00000" className="pl-10 h-12 rounded-xl bg-slate-50/50 border-slate-200" required />
                   </div>
                 </div>
 
@@ -157,7 +172,8 @@ const SignupPage = () => {
                       id="password" 
                       type={showPassword ? 'text' : 'password'} 
                       className="h-12 rounded-xl bg-slate-50/50 border-slate-200 pr-10" 
-                      required 
+                      required
+                      onChange={(v) => setFormData(p => ({ ...p, password: v.target.value }))} value={formData.password}
                     />
                     <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 bottom-3 text-slate-400">
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -169,7 +185,8 @@ const SignupPage = () => {
                       id="confirmPassword" 
                       type={showConfirmPassword ? 'text' : 'password'} 
                       className="h-12 rounded-xl bg-slate-50/50 border-slate-200 pr-10" 
-                      required 
+                      required
+                      onChange={(v) => setFormData(p => ({ ...p, confirmPassword: v.target.value }))} value={formData.confirmPassword}
                     />
                     <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 bottom-3 text-slate-400">
                       {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -178,14 +195,31 @@ const SignupPage = () => {
                 </div>
 
                 <div className="flex items-center space-x-2 py-2">
-                  <Checkbox id="terms" className="rounded-md data-[state=checked]:bg-blue-600" required />
+                  <Checkbox onChange={(v) => setFormData(p => ({ ...p, terms: v.target.value }))} value={formData.terms} id="terms" className="rounded-md data-[state=checked]:bg-blue-600" required />
                   <label htmlFor="terms" className="text-xs text-slate-500 leading-tight cursor-pointer">
                     I agree to the <Link href="#" className="text-blue-600 font-bold">Terms of Service</Link> and <Link href="#" className="text-blue-600 font-bold">Privacy Policy</Link>.
                   </label>
                 </div>
 
+                <div className="">
+                  <Turnstile
+                  className="text-center"
+                    siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ''}
+                    onSuccess={(token) => setToken(token)}
+                    onExpire={() => setToken(null)}
+                  />
+                </div>
+
                 <Button className="w-full h-14 bg-gradient-to-r from-blue-600 to-indigo-600 hover:shadow-lg hover:shadow-blue-200 rounded-xl text-lg font-bold transition-all active:scale-95">
-                  Create Account <ArrowRight className="ml-2" size={20} />
+                  {
+                    loading ? (
+                      <Loader2 className="animate-spin" />
+                    ) : (
+                    <>
+                      Create Account <ArrowRight className="ml-2" size={20} />
+                    </>
+                    )
+                  }
                 </Button>
               </form>
 

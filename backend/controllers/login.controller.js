@@ -68,10 +68,18 @@ export const login = async (req, res) => {
 
 export const signup = async (req, res) => {
     try {
-        const { name, email, phone, password, token } = req.body;
+        const { name, email, phone, password, confirmPassword, userType, token } = req.body;
 
         if (!name || !email || !phone || !password || !token) {
             return res.status(400).json({ success: false, message: "All fields are required" });
+        }
+
+        if (password !== confirmPassword) {
+            return res.status(400).json({
+                success: false,
+                message: 'The passwords you entered do not match. Please check your confirm password field and try agian.',
+                code: 'passwords_missmatch',
+            });
         }
 
         // Validate Cloudflare Captcha
@@ -88,7 +96,7 @@ export const signup = async (req, res) => {
             return res.status(400).json({ success: false, message: "User with this email already exists. Please use another email. If this email belongs to you try resetting your password." });
         }
 
-        await User.create({ name, email, phone, password });
+        await User.create({ name, email, phone, password, userType });
 
         res.status(201).json({
             success: true,

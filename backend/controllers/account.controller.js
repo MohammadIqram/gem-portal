@@ -1,4 +1,5 @@
 import User from "../models/user.model.js";
+import bcrypt from "bcryptjs";
 
 export const profile = async (req, res) => {
     return res.status(200).json({
@@ -10,14 +11,15 @@ export const profile = async (req, res) => {
 export const getAccount = async (req, res) => {
   try {
     // try fetching redis from the server
-    let user = null;
-    let rawUser = await redis.get(`account:${req.user.id}`);
-    if (rawUser) {
-      user = JSON.parse(rawUser);
-    }
-    else {
-      user = await User.findById(req.user._id).select('-password').lean();
-    }
+    // let user = null;
+    // let rawUser = await redis.get(`account:${req.user.id}`);
+    // if (rawUser) {
+    //   user = JSON.parse(rawUser);
+    // }
+    // else {
+    //   user = await User.findById(req.user._id).select('-password').lean();
+    // }
+    let user = await User.findById(req.user._id).select('-password').lean();
     if (!user) {
       return res.status(404).json({
         success: true,
@@ -53,7 +55,7 @@ export const updateAccountBasic = async (req, res) => {
       req.user.id,
       { $set: { name: String(name).trim() } },
       { new: true, runValidators: true }
-    ).select("-password");
+    );
 
     if (!user.modifiedCount === 1) {
       return res.status(404).json({
@@ -61,8 +63,6 @@ export const updateAccountBasic = async (req, res) => {
         message: "There is was some error when trying to update your profile.",
       });
     }
-
-    await redis.del(`account:${req.user.id}`);
 
     return res.status(200).json({
       success: true,
@@ -107,24 +107,63 @@ export const updateAccountPassword = async (req, res) => {
     const hashedPassword = await bcrypt.hash(String(newPassword), salt);
 
     const user = await User.updateOne(
-      req.user._id,
+      {_id: req.user._id},
       { $set: { password: hashedPassword } },
       { new: true }
-    ).select("-password");
+    );
 
-    if (!user) {
-      return res.status(404).json({
+    if (!user.modifiedCount === 1) {
+      return res.status(400).json({
         success: false,
-        message: "user not found.",
+        message: "There was some while updating your account password. Try again if the issue persists, contact support.",
+        code: 'password_not_changed',
       });
     }
 
     return res.status(200).json({
       success: true,
-      message: "password updated successfully.",
+      message: "password for your account was updated successfully.",
     });
   } catch (error) {
     console.log("error from updateAccountPassword controller: ", error.message);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "some unexpected error occured",
+    });
+  }
+};
+
+export const updateAccountPhoneNumber = async (req, res) => {
+  try {
+    const { phone } = req.body || {};
+
+    if (!phone || !String(phone).trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Phone number is required.",
+      });
+    }
+
+    const user = await User.updateOne(
+      req.user.id,
+      { $set: { phone: String(phone).trim() } },
+      { new: true, runValidators: true }
+    );
+
+    if (!user.modifiedCount === 1) {
+      return res.status(404).json({
+        success: false,
+        message: "There is was some error when trying to update your profile phone number.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Your account Phone number was updated successfully.",
+      user,
+    });
+  } catch (error) {
+    console.log("error from updateAccountPhoneNumber controller: ", error.message);
     return res.status(500).json({
       success: false,
       message: error.message || "some unexpected error occured",

@@ -17,10 +17,10 @@ export const useUserStore = create((set, get) => ({
       user: state.user ? { ...state.user, ...data } : null,
     })),
 
-  signup: async ({ name, email, phone, password, confirmPassword, token }) => {
+  signup: async (form, token) => {
     set({ loading: true });
 
-    if (password !== confirmPassword) {
+    if (form.password !== form.confirmPassword) {
       set({ loading: false });
       toast.error("Passwords do not match");
       return;
@@ -31,7 +31,7 @@ export const useUserStore = create((set, get) => ({
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, phone, password, token }),
+        body: JSON.stringify({ ...form, token }),
       });
 
       const data = await res.json();
@@ -39,7 +39,7 @@ export const useUserStore = create((set, get) => ({
         set({ user: data, loading: false });
         toast.success(data.message || "Signup successful! Redirecting...");
         return {
-          redirectTo: '/login'
+          next: '/login'
         };
       }
       toast.error(data.message || "Signup error at the moment. Please try again sometime.");

@@ -99,40 +99,6 @@ const memberships = [
   },
 ];
 
-const DESIGNATION_OPTIONS = [
-  "Full Stack Developer",
-  "Frontend Developer",
-  "Backend Developer",
-  "Mobile Developer",
-  "Data Analyst",
-  "Product Manager",
-  "UI/UX Designer",
-];
-
-const EXPERIENCE_OPTIONS = [
-  "0-1 years",
-  "1-3 years",
-  "3-5 years",
-  "5-8 years",
-  "8-12 years",
-  "12+ years",
-];
-
-const COMPANY_TYPE_OPTIONS = [
-  "Startup",
-  "Mid-size Product Company",
-  "Enterprise",
-  "Service-Based Company",
-  "Remote-First Company",
-];
-
-const GOAL_OPTIONS = [
-  { id: "perfect_resume", label: "Create the perfect resume" },
-  { id: "find_jobs", label: "Find relevant jobs" },
-  { id: "hr_emails", label: "Get HR emails directly" },
-  { id: "others", label: "Others" },
-];
-
 const SUPPORT_SUBJECT_OPTIONS = [
   "General Inquiry",
   "Technical Support",
@@ -194,19 +160,12 @@ function ProfileSettingsPanel() {
   const [fullName, setFullName] = useState("");
   const [currentEmail, setCurrentEmail] = useState("");
   const [newEmail, setNewEmail] = useState("");
-  const [currentDesignation, setCurrentDesignation] = useState("");
-  const [currentCompany, setCurrentCompany] = useState("");
-  const [experience, setExperience] = useState("");
-  const [desiredDesignation, setDesiredDesignation] = useState("");
-  const [companyType, setCompanyType] = useState("");
-  const [goals, setGoals] = useState([]);
-  const [otherGoal, setOtherGoal] = useState("");
-  const [linkedinUrl, setLinkedinUrl] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [savingBasic, setSavingBasic] = useState(false);
-  const [savingCareer, setSavingCareer] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
+  const [phone, setPhone] = useState('');
+  const [savingPhone, setSavingPhone] = useState('');
 
   const { updateUser } = useUserStore();
 
@@ -230,19 +189,7 @@ function ProfileSettingsPanel() {
 
         if (resData?.success) {
             setFullName(resData?.user?.name || "");
-            setCurrentEmail(resData?.user?.email || "");
-            setCurrentDesignation(resData?.user?.jobseekerOnboarding?.currentDesignation || "");
-            setCurrentCompany(resData?.user?.jobseekerOnboarding?.currentCompany || "");
-            setExperience(resData?.user?.jobseekerOnboarding?.experience || "");
-            setDesiredDesignation(resData?.user?.jobseekerOnboarding?.desiredDesignation || "");
-            setCompanyType(resData?.user?.jobseekerOnboarding?.companyType || "");
-            setGoals(
-                Array.isArray(resData?.user?.jobseekerOnboarding?.goals)
-                ? resData.user.jobseekerOnboarding.goals
-                : []
-            );
-            setOtherGoal(resData?.user?.jobseekerOnboarding?.otherGoal || "");
-            setLinkedinUrl(resData?.user?.jobseekerOnboarding?.linkedinUrl || "");
+            setPhone(resData?.user?.phone || "");
         }
       } catch (error) {
         console.log(error?.message);
@@ -253,12 +200,6 @@ function ProfileSettingsPanel() {
     getProfile();
   }, []);
 
-  const toggleGoal = (goal) => {
-    setGoals((prev) =>
-      prev.includes(goal) ? prev.filter((item) => item !== goal) : [...prev, goal]
-    );
-  };
-
   const handleSaveBasicInfo = async () => {
     if (!fullName.trim()) {
       toast.error("Full name is required.");
@@ -267,7 +208,7 @@ function ProfileSettingsPanel() {
 
     try {
         setSavingBasic(true);
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/account/me/basic`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/account/profile/me/basic`, {
             method: "PUT",
             credentials: "include", // send cookies if using session auth
             headers: {
@@ -293,24 +234,22 @@ function ProfileSettingsPanel() {
     }
   };
 
-  const handleSaveCareerDetails = async () => {
+  const handlePhoneNumberUpdate = async () => {
+    if (!phone.trim()) {
+      toast.error("Phone number is required.");
+      return;
+    }
+
     try {
-        setSavingCareer(true);
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/account/jobseeker`, {
+        setSavingPhone(true);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/account/profile/me/phone`, {
             method: "PUT",
-            credentials: "include", // send cookies if using session auth
+            credentials: "include",
             headers: {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                currentDesignation,
-                currentCompany: currentCompany.trim(),
-                experience,
-                desiredDesignation: desiredDesignation.trim(),
-                companyType,
-                goals,
-                otherGoal: goals.includes("others") ? otherGoal.trim() : "",
-                linkedinUrl: linkedinUrl.trim(),
+                phone: phone.trim(),
             }),
         });
 
@@ -319,11 +258,12 @@ function ProfileSettingsPanel() {
             toast.error(data.message || "failed to update account");
             return;
         }
-        toast.success("Career details updated successfully.");
+        toast.success(data.message || "Phone updated successfully.");
+        updateUser({ phone: phone.trim() });
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Failed to update career details.");
+      toast.error(error?.response?.data?.message || "Failed to update basic account details.");
     } finally {
-      setSavingCareer(false);
+      setSavingPhone(false);
     }
   };
 
@@ -340,7 +280,7 @@ function ProfileSettingsPanel() {
 
     try {
         setSavingPassword(true);
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/account/me/change-password`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/account/profile/me/change-password`, {
             method: "PUT",
             credentials: "include", // send cookies if using session auth
             headers: {
@@ -415,117 +355,12 @@ function ProfileSettingsPanel() {
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label>Current Designation</Label>
-            <Select value={currentDesignation} onValueChange={setCurrentDesignation}>
-              <SelectTrigger className="h-10 w-full rounded-lg border-neutral-200">
-                <SelectValue placeholder="Select your role" />
-              </SelectTrigger>
-              <SelectContent>
-                {DESIGNATION_OPTIONS.map((option) => (
-                  <SelectItem key={option} value={option}>
-                    {option}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="career-current-company">Current Company</Label>
+            <Label htmlFor="career-current-company">Phone number</Label>
             <Input
               id="career-current-company"
-              placeholder="Company name"
-              value={currentCompany}
-              onChange={(e) => setCurrentCompany(e.target.value)}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Experience</Label>
-            <Select value={experience} onValueChange={setExperience}>
-              <SelectTrigger className="h-10 w-full rounded-lg border-neutral-200">
-                <SelectValue placeholder="Select experience" />
-              </SelectTrigger>
-              <SelectContent>
-                {EXPERIENCE_OPTIONS.map((option) => (
-                  <SelectItem key={option} value={option}>
-                    {option}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="career-desired-designation">Desired Designation</Label>
-            <Input
-              id="career-desired-designation"
-              placeholder="Senior Full Stack Developer"
-              value={desiredDesignation}
-              onChange={(e) => setDesiredDesignation(e.target.value)}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Company Type</Label>
-            <Select value={companyType} onValueChange={setCompanyType}>
-              <SelectTrigger className="h-10 w-full rounded-lg border-neutral-200">
-                <SelectValue placeholder="Select company type" />
-              </SelectTrigger>
-              <SelectContent>
-                {COMPANY_TYPE_OPTIONS.map((option) => (
-                  <SelectItem key={option} value={option}>
-                    {option}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2 md:col-span-2">
-            <Label>Goals</Label>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {GOAL_OPTIONS.map((option) => {
-                const selected = goals.includes(option.id);
-                return (
-                  <button
-                    key={option.id}
-                    type="button"
-                    onClick={() => toggleGoal(option.id)}
-                    className={cn(
-                      "flex min-h-16 items-center rounded-lg border p-3 text-left text-sm transition",
-                      selected
-                        ? "border-neutral-900 bg-neutral-100 text-neutral-900"
-                        : "border-neutral-200 text-neutral-700 hover:border-neutral-400"
-                    )}
-                  >
-                    {option.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {goals.includes("others") && (
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="career-other-goal">Other Goal</Label>
-              <Input
-                id="career-other-goal"
-                placeholder="Type your goal"
-                value={otherGoal}
-                onChange={(e) => setOtherGoal(e.target.value)}
-              />
-            </div>
-          )}
-
-          <div className="space-y-2 md:col-span-2">
-            <Label htmlFor="career-linkedin-url">Linkedin URL</Label>
-            <Input
-              id="career-linkedin-url"
-              type="url"
-              placeholder="https://www.linkedin.com/in/username"
-              value={linkedinUrl}
-              onChange={(e) => setLinkedinUrl(e.target.value)}
+              placeholder="new phone number"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
             />
           </div>
 
@@ -533,10 +368,10 @@ function ProfileSettingsPanel() {
             <Button
               type="button"
               className="bg-indigo-600 text-white hover:bg-indigo-700"
-              onClick={handleSaveCareerDetails}
-              disabled={savingCareer}
+              onClick={handlePhoneNumberUpdate}
+              disabled={savingPhone}
             >
-              {savingCareer ? "Saving..." : "Save Career Details"}
+              Change phone number
             </Button>
           </div>
         </CardContent>

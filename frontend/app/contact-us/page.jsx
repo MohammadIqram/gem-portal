@@ -154,8 +154,8 @@ const contactCards = [
     icon: Mail,
     title: 'Email Us',
     desc: 'Drop us a line anytime and we\'ll get back within 24 hours.',
-    value: 'support@gempro.in',
-    link: 'mailto:support@gempro.in',
+    value: 'support@gembook.in',
+    link: 'mailto:support@gembook.in',
     gradient: 'from-blue-500 to-sky-500',
   },
   {

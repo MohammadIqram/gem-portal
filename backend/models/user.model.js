@@ -28,17 +28,10 @@ const userSchema = new mongoose.Schema(
 			enum: ["customer", "admin"],
 			default: "customer",
 		},
-		// New jobseeker onboarding section
-		jobseekerOnboarding: {
-			currentDesignation: { type: String },
-			currentCompany: { type: String },
-			experience: { type: String }, // assuming years of experience
-			desiredDesignation: { type: String },
-			companyType: { type: String },
-			goals: { type: [String] }, // array if multiple goals
-			otherGoal: { type: String }, // for otherGoalText
-			linkedinUrl: { type: String },
-		},
+		userType: {
+			type: String,
+			required: true,
+		}
 	},
 	{
 		timestamps: true,
