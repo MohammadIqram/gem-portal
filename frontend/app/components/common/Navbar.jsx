@@ -16,6 +16,8 @@ import Link from 'next/link'
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
+import { useUserStore } from "@/stores/useUserStore";
+import { cn } from "@/lib/utils";
 
 function NavbarMain() {
   const navItems = [
@@ -36,8 +38,10 @@ function NavbarMain() {
       link: "agents",
     }
   ];
+  const isLight = 'light';
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { user, logout } = useUserStore();
 
   return (
     <div className="w-full fixed top-0 left-0 z-50 py-2">
@@ -50,7 +54,33 @@ function NavbarMain() {
             <Link href="/contact-us">
               <NavbarButton variant="secondary">contact us</NavbarButton>
             </Link>
-            <AnimatedSignupButton />
+          {
+              user ? (
+                <div className="relative group">
+                  <button
+                    className={cn(
+                      "flex items-center justify-center w-9 h-9 rounded-full text-white text-sm font-medium",
+                      isLight ? "bg-slate-900" : "bg-gradient-to-br from-purple-500 to-blue-500"
+                    )}
+                    aria-haspopup="true"
+                    aria-expanded={false}
+                  >
+                    {user?.email ? user.email.split("@")[0].slice(0, 2).toUpperCase() : "?"}
+                  </button>
+
+                  <div className={cn(
+                    "absolute right-0 mt-2 w-40 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transform translate-y-1 group-hover:translate-y-0 transition-all duration-150 z-50 border",
+                    isLight ? "bg-white border-neutral-200" : "bg-slate-800 border-slate-700"
+                  )}>
+                    <Link href={`/my-account/dashboard/me`} className={cn("block px-4 py-2 text-sm", isLight ? "text-neutral-700 hover:bg-neutral-100" : "text-slate-200 hover:bg-slate-700")}>Profile</Link>
+                    <Link href={`/my-account/dashboard/me`} className={cn("block px-4 py-2 text-sm", isLight ? "text-neutral-700 hover:bg-neutral-100" : "text-slate-200 hover:bg-slate-700")}>Orders</Link>
+                    <button onClick={async () => { await logout(); }} className={cn("w-full text-left px-4 py-2 text-sm", isLight ? "text-neutral-700 hover:bg-neutral-100" : "text-slate-200 hover:bg-slate-700")}>Logout</button>
+                  </div>
+                </div>
+              ) : (
+                <AnimatedSignupButton />
+              )
+              }
           </div>
         </NavBody>
 

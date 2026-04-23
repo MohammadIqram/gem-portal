@@ -10,23 +10,19 @@ import { Label } from '@/app/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/app/components/ui/card'
 import { Separator } from '@/app/components/ui/separator'
 import { Checkbox } from '@/app/components/ui/checkbox'
+import { useUserStore } from '@/stores/useUserStore'
+import { Turnstile } from "@marsidev/react-turnstile";
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    remember: false,
-  })
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [token, setToken] = useState(null);
+  const { login, loading } = useUserStore();
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setIsLoading(true)
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    console.log('Login submitted:', formData)
-    setIsLoading(false)
+    await login(email, password, token);
   }
 
   const handleChange = (e) => {
@@ -121,6 +117,8 @@ const LoginPage = () => {
                       name="email"
                       type="email"
                       placeholder="name@company.com"
+                      onChange={(e) => setEmail(e.target.value)}
+                      value={email}
                       className="pl-12 h-14 bg-white/50 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 transition-all text-base"
                       required
                     />
@@ -139,6 +137,8 @@ const LoginPage = () => {
                       name="password"
                       type={showPassword ? 'text' : 'password'}
                       placeholder="••••••••"
+                      onChange={(e) => setPassword(e.target.value)}
+                      value={password}
                       className="pl-12 pr-12 h-14 bg-white/50 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 transition-all text-base"
                       required
                     />
@@ -159,12 +159,21 @@ const LoginPage = () => {
                   </label>
                 </div>
 
+                <div>
+                  <Turnstile
+                  className="text-center"
+                    siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ''}
+                    onSuccess={(token) => setToken(token)}
+                    onExpire={() => setToken(null)}
+                  />
+                </div>
+
                 <Button
                   type="submit"
-                  disabled={isLoading}
+                  disabled={loading}
                   className="w-full h-14 bg-slate-900 hover:bg-slate-800 text-white rounded-xl shadow-xl shadow-slate-200 transition-all active:scale-[0.98] disabled:opacity-70 group"
                 >
-                  {isLoading ? (
+                  {loading ? (
                     <Loader2 className="animate-spin" />
                   ) : (
                     <span className="flex items-center text-lg font-bold tracking-tight">

@@ -208,12 +208,13 @@ export const NavbarLogo = () => {
 
 export const NavbarButton = ({
   href,
-  as: Tag = "a",
+  as: Tag,
   children,
   className,
   variant = "primary",
   ...props
 }) => {
+  const Component = Tag || (href ? "a" : "button");
   const baseStyles =
     "px-4 py-2 rounded-md bg-white button bg-white text-black text-sm font-bold relative cursor-pointer hover:-translate-y-0.5 transition duration-200 inline-block text-center";
 
@@ -227,11 +228,11 @@ export const NavbarButton = ({
   };
 
   return (
-    <Tag
+    <Component
       href={href || undefined}
       className={cn(baseStyles, variantStyles[variant], className)}
       {...props}>
       {children}
-    </Tag>
+    </Component>
   );
 };
