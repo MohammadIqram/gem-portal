@@ -38,7 +38,7 @@ app.use("/api/v1/account", accountRoutes);
 app.use("/api/v1/contact", contactRoutes);
 
 // connect DB
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log('server running on port: ', PORT);
     connectDB();
 })
