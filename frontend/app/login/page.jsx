@@ -25,11 +25,6 @@ const LoginPage = () => {
     await login(email, password, token);
   }
 
-  const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
-
   return (
     <div className="min-h-screen relative flex items-center justify-center bg-[#f8fafc] overflow-hidden py-12 px-4">
       {/* Dynamic Background Elements */}

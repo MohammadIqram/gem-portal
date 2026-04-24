@@ -27,15 +27,15 @@ function NavbarMain() {
     },
     {
       name: "About",
-      link: "about",
+      link: "/about",
     },
     {
       name: "Pricing",
-      link: "membership",
+      link: "/membership",
     },
     {
       name: "Agents",
-      link: "agents",
+      link: "/agents",
     }
   ];
   const isLight = 'light';
