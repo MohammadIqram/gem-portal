@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 
 const contactUsSchema = new mongoose.Schema(
   {
-        fullname: {
+        name: {
             type: String,
             required: true,
         },
@@ -14,7 +14,7 @@ const contactUsSchema = new mongoose.Schema(
         phone: {
             type: String,
         },
-        inquiryType: {
+        inquiry: {
             type: String,
             required: true,
         },
@@ -29,6 +29,6 @@ const contactUsSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Support = mongoose.model("contactus", contactUsSchema);
+const ContactUs = mongoose.model("contactus", contactUsSchema);
 
-export default contactUsSchema;
+export default ContactUs;

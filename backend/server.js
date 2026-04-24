@@ -7,6 +7,7 @@ import { connectDB } from "./lib/db.js";
 // routes
 import authRoutes from "./routes/auth.route.js";
 import accountRoutes from "./routes/account.route.js";
+import contactRoutes from "./routes/support.route.js";
 
 dotenv.config();
 
@@ -34,6 +35,7 @@ app.get('/api/health', (req, res) => {
 // define rotues
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/account", accountRoutes);
+app.use("/api/v1/contact", contactRoutes);
 
 // connect DB
 app.listen(PORT, () => {

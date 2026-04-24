@@ -23,6 +23,7 @@ import {
   Globe,
   X,
 } from 'lucide-react'
+import { toast } from 'sonner'
 
 /* ─── animation variants ─── */
 const fadeUp = {
@@ -202,21 +203,41 @@ const ContactPage = () => {
 
   const set = (key) => (val) => setForm((f) => ({ ...f, [key]: typeof val === 'object' && val.target ? val.target.value : val }))
 
-  const canSubmit = form.name && form.email && form.inquiry && form.message
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!canSubmit) return
-    setSubmitting(true)
-    setTimeout(() => {
-      setSubmitting(false)
-      setSubmitted(true)
-    }, 1800)
+    try {
+        if (form.name === '' || form.email === '' || form.inquiry === '' || form.message === '') {
+          toast.error('Please fill the required fields before submitting the form.');
+          return;
+        }
+        setSubmitting(true);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/contact/general-contact`, {
+            method: "POST",
+            credentials: "include", // send cookies if using session auth
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(form),
+        });
+
+        const data = await response.json();
+        if (!data.success) {
+            toast.error(data.message || "Could not make contact. Please try again sometime.");
+            return;
+        }
+        toast.success(data.message || 'Thank You.');
+        resetForm();
+        setSubmitted(true);
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Could not make contact. Please try again sometime.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   const resetForm = () => {
     setForm({ name: '', email: '', phone: '', company: '', inquiry: '', subject: '', message: '' })
-    setSubmitted(false)
+    setSubmitted(false);
   }
 
   return (
@@ -394,14 +415,11 @@ const ContactPage = () => {
                           </p>
                           <motion.button
                             type="submit"
-                            whileHover={{ scale: canSubmit ? 1.03 : 1 }}
-                            whileTap={{ scale: canSubmit ? 0.97 : 1 }}
-                            disabled={!canSubmit || submitting}
-                            className={`px-8 py-3.5 rounded-full text-sm font-semibold flex items-center gap-2 transition-all duration-300 ${
-                              canSubmit
-                                ? 'bg-gradient-to-r from-blue-600 to-sky-500 text-white shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40'
-                                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                            }`}
+                            whileHover={{ scale: submitting ? 1.03 : 1 }}
+                            whileTap={{ scale: submitting ? 0.97 : 1 }}
+                            disabled={submitting}
+                            className="px-8 py-3.5 rounded-full text-sm font-semibold flex items-center gap-2 transition-all duration-300 
+                              bg-gradient-to-r from-blue-600 to-sky-500 text-white shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40"
                           >
                             {submitting ? (
                               <><Loader2 className="w-4 h-4 animate-spin" /> Sending...</>

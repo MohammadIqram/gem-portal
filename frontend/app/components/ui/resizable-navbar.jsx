@@ -201,7 +201,7 @@ export const NavbarLogo = () => {
         alt="logo"
         width={30}
         height={30} />
-      <span className="font-medium text-black dark:text-white">Gem Connect</span>
+      <span className="font-medium text-black dark:text-white">Gem Book</span>
     </Link>
   );
 };
